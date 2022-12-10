@@ -3,9 +3,14 @@ using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Security.Cryptography;
 using Azure.Data.Tables;
 using Azure.Identity;
+using Jacquemin.VoiceAsVote.API.Accounts;
 using Jacquemin.VoiceAsVote.API.Options;
+using Jacquemin.VoiceAsVote.API.Utils;
+using Jacquemin.VoiceAsVote.API.VoiceTables;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -50,5 +55,11 @@ internal class Startup : FunctionsStartup
             }
             factoryBuilder.AddClient<TableServiceClient, VavTableStorageOptions>(GetServiceClient);
         });
+
+        builder.Services.AddSingleton(_ => SHA256.Create());
+        builder.Services.AddSingleton<IHash, Hash>();
+        builder.Services.AddSingleton<IAccountValidator, MailAccountValidator>();
+        builder.Services.AddSingleton<IVoiceTableStrategy, VoiceTableStrategy>();
+        builder.Services.AddSingleton<IVoiceTableOperation, VoiceTableOperation>();
     }
 }
